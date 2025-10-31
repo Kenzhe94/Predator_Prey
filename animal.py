@@ -11,7 +11,7 @@ class Animal:
         """A class method for setting the starting breed time for all the instances."""
         cls.breed_time = breed_time
 
-    def __init__(self, island, x=0, y=0, name="A"):
+    def __init__(self, island, x=0, y=0, name="A", breed_n=1):
         """Initializes the animal and its position."""
         # Variables starting with a single underscore are 'protected', accessible in subclasses
         # Variables starting with two underscores are 'private', not accessible outside the class
@@ -21,6 +21,7 @@ class Animal:
         self.__name = name
         self._moved = False  # indicating that the instance has not moved during the current clock tick
         self._breed_clock = self.breed_time
+        self._breed_n = breed_n
 
     def __str__(self):
         return self.__name
@@ -37,7 +38,7 @@ class Animal:
         offset = [(-1, 1), (0, 1), (1, 1), (-1, 0), (1, 0), (-1, -1), (0, -1), (1, -1)]
         result = Animal.NOT_FOUND
         random.shuffle(offset)
-        
+
         for dx, dy in offset:
             x = self._x + dx
             y = self._y + dy
@@ -75,13 +76,16 @@ class Animal:
         """
 
         if self._breed_clock <= 0:
-            location = self._check_grid_for_neighbor(type(Island.UNOCCUPIED))
-            if location != Animal.NOT_FOUND:
-                the_class = self.__class__
-                # Reset the breed clock
-                self._breed_clock = (
-                    the_class.breed_time
-                )  # breed_time is a class variable
-                # Create an instance of a new animal
-                new_animal = the_class(self._island, x=location[0], y=location[1])
-                self._island.register(new_animal)
+            produced = False
+            for _ in range(self._breed_n):
+                location = self._check_grid_for_neighbor(type(Island.UNOCCUPIED))
+                if location != Animal.NOT_FOUND:
+                    the_class = self.__class__
+                    # Reset the breed clock
+                    if not produced:
+                        self._breed_clock = (
+                            the_class.breed_time
+                        )  # breed_time is a class variable
+                    # Create an instance of a new animal
+                    new_animal = the_class(self._island, x=location[0], y=location[1])
+                    self._island.register(new_animal)
