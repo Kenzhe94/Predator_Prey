@@ -54,4 +54,5 @@ class Island:
         for x in range(self.__grid_size):
             for y in range(self.__grid_size):
                 animal = self.animal(x, y)
-                animal.clear_move()
+                if animal:
+                    animal.clear_move()
